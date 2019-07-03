@@ -1,0 +1,13 @@
+{
+  "name": "yeezywatch",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Ole Goode",
+  "license": "MIT",
+  "dependencies": {
+    "global": "^4.4.0",
+    "got": "^9.6.0",
+    "looks-same": "^7.2.1",
+    "puppeteer": "^1.18.1"
+  }
+}
