@@ -6,7 +6,8 @@ const puppeteer = require('puppeteer'),
   fifteenMinutes = 1000 * 60 * 15,
   apiKey = fs.readFileSync('./iftttkey', 'utf8');
 
-let screenShotCount = 0;
+let prevShotIndex = 0,
+  nextShotIndex = 0;
 
 fs.existsSync('./images') || fs.mkdirSync('./images');
 
@@ -16,6 +17,7 @@ function log(message) {
 }
 
 async function capture(url, path) {
+  let thisShotIndex = nextShotIndex;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.setViewport({
@@ -25,16 +27,18 @@ async function capture(url, path) {
   });
   await page.goto(url);
   await page.screenshot({ path });
-  log(`Screenshot ${screenShotCount} captured.`);
-  screenShotCount++;
-  return browser.close();
+  log(`Screenshot ${thisShotIndex} captured.`);
+  nextShotIndex > 19 ? nextShotIndex = 0 : nextShotIndex++;
+  return browser.close().then(() => thisShotIndex);
 }
 
 async function yeezyWatch() {
-  capture(domain, `images/screenshot${screenShotCount}.png`)
-    .then(() => {
-      const prevShot = `images/screenshot${screenShotCount - 2}.png`,
-        recentShot = `images/screenshot${screenShotCount - 1}.png`;
+  capture(domain, `images/screenshot${nextShotIndex}.png`)
+    .then(thisShotIndex => {
+      const prevShot = `images/screenshot${prevShotIndex}.png`,
+        recentShot = `images/screenshot${thisShotIndex}.png`;
+
+      prevShotIndex = thisShotIndex;
 
       looksSame(prevShot, recentShot, (err, { equal } = {}) => {
         log(`Comparing ${prevShot} with ${recentShot}`);
@@ -50,7 +54,7 @@ async function yeezyWatch() {
     });
 }
 
-capture(domain, 'images/screenshot0.png').then(() => {
+capture(domain, `images/screenshot${nextShotIndex}.png`).then(() => {
   log('Starting watch...');
   got.post(`https://maker.ifttt.com/trigger/yeezywatch_init/with/key/${apiKey}`);
   setInterval(yeezyWatch, fifteenMinutes);
