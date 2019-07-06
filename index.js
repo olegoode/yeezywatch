@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer'),
   looksSame = require('looks-same'),
   fs = require('fs'),
   domain = 'https://yeezysupply.com',
-  fifteenMinutes = 1000 * 60 * 15,
+  tenMinutes = 1000 * 60 * 10,
   apiKey = fs.readFileSync('./iftttkey', 'utf8');
 
 let prevShotIndex = 0,
@@ -57,5 +57,5 @@ async function yeezyWatch() {
 capture(domain, `images/screenshot${nextShotIndex}.png`).then(() => {
   log('Starting watch...');
   got.post(`https://maker.ifttt.com/trigger/yeezywatch_init/with/key/${apiKey}`);
-  setInterval(yeezyWatch, fifteenMinutes);
+  setInterval(yeezyWatch, tenMinutes);
 });
